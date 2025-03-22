@@ -7,7 +7,7 @@ namespace accoudingWeb.DataBase;
 public class ApplicationContext : DbContext
 {
     // таблица юзеров
-    public DbSet<User> Users { get; set; }
+    public DbSet<Employee> Users { get; set; }
         
     // таблица организаций
     public DbSet<Organization> Organizations { get; set; }
@@ -31,15 +31,16 @@ public class ApplicationContext : DbContext
     // настраиваем связи между таблицами
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Employee>().HasOne(e => e.Organization).WithMany(o => o.Employeeres);
         // связи многие ко многим между организацией и предметами
         modelBuilder.Entity<Organization>().HasMany(o => o.Equipments).WithMany(p => p.Organizations);
         modelBuilder.Entity<Organization>().HasMany(o => o.PreciousMetals).WithMany(p => p.Organizations);
         modelBuilder.Entity<Organization>().HasMany(o => o.OfficeEquipments).WithMany(p => p.Organizations);
         
-        // связи многие ко многим между организацией и отчетами
-        modelBuilder.Entity<Organization>().HasMany(o => o.AccoudingsEquipment).WithMany(p => p.Organizations);
-        modelBuilder.Entity<Organization>().HasMany(o => o.AccoudingsOfficeEquipment).WithMany(p => p.Organizations);
-        modelBuilder.Entity<Organization>().HasMany(o => o.AccoudingsPreciousMetals).WithMany(p => p.Organizations);
+        // связи один ко многим между организацией и отчетами
+        modelBuilder.Entity<Organization>().HasMany(o => o.AccoudingsEquipment).WithOne(p => p.Organization);
+        modelBuilder.Entity<Organization>().HasMany(o => o.AccoudingsOfficeEquipment).WithOne(p => p.Organization);
+        modelBuilder.Entity<Organization>().HasMany(o => o.AccoudingsPreciousMetals).WithOne(p => p.Organization);
         
         // связи многие ко многим между отчетами и предметами
         modelBuilder.Entity<Accouding<Equipment>>().HasMany(a => a.Items).WithMany(b => b.Accoudings);
