@@ -15,4 +15,6 @@ public class Organization
     public List<Accouding<Equipment>> AccoudingsEquipment { get; set; }
     public List<Accouding<OfficeEquipment>> AccoudingsOfficeEquipment { get; set; }
     public List<Accouding<PreciousMetals>> AccoudingsPreciousMetals { get; set; }
+    
+    public List<Employee> Employeeres { get; set; }
 }
