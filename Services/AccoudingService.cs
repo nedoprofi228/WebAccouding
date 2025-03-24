@@ -1,66 +1,28 @@
 using accoudingWeb.DataBase;
 using accoudingWeb.Entities;
+using accoudingWeb.ViewModels;
 
 namespace accoudingWeb.Services;
 
+/// <summary>
+/// сервис для создания и получения отчетов
+/// </summary>
+/// <param name="dbContext"></param>
 public class AccoudingService(ApplicationContext dbContext)
 {
     
     // дженерик метод для создания отчетов разных предметов
-    private Accouding<T> CreateAccouding<T>(Employee sender,
-        string name, 
-        AccoudingStatus status, 
-        List<T> items,
-        ItemStatus itemStatus,
-        decimal price = -1) where T : BaseItem<T>
+    public Accouding<T> CreateAccouding<T>(Employee manager, Ticket<T> ticket) 
+        where T : BaseItem<T>
     {
         Accouding<T> accouding = new Accouding<T>
         {
-            Sender = sender,
-            Name = name,
-            AccoudingStatus = status,
             Date = DateTime.Now,
-            Items = items,
-            ItemStatus = itemStatus,
-            Organization = sender.Organization
+            Organization = manager.Organization,
+            Ticket = ticket,
+            Manager = manager,
         };
-        
-        accouding.Name = name;
-        accouding.Date = DateTime.Now;
-        accouding.AccoudingStatus = status;
-        accouding.Items = items;
-        accouding.ItemStatus = itemStatus;
-        accouding.TotalPrice = items.Sum(item => item.Price);
 
-        if (price > -1)
-            accouding.TotalPrice = price;
-
-        return accouding;
-    }
-
-    // дженерик метод для создания отчета покупки разных предметов
-    public Accouding<T> CreateBuyAccouding<T>(Employee sender, string name, List<T> items, decimal price = -1) where T : BaseItem<T>
-        => CreateAccouding<T>(sender, name, AccoudingStatus.Pending, items, ItemStatus.Buy, price);
-    
-    // дженерик метод для создания отчета починки разных предметов
-    public Accouding<T> CreateRepairAccouding<T>(Employee sender, string name, List<T> items, decimal price = -1) where T : BaseItem<T> 
-        => CreateAccouding<T>(sender, name, AccoudingStatus.Pending, items, ItemStatus.Repair, price);
-    
-    // дженерик метод для создания отчета списания разных предметов
-    public Accouding<T> CreateWriteOfAccouding<T>(Employee sender, string name, List<T> items, decimal price = -1) where T : BaseItem<T> 
-        => CreateAccouding<T>(sender, name, AccoudingStatus.Pending, items, ItemStatus.WriteOf, price);
-
-    public Accouding<T> AcceptAccouding<T>(Employee manager, Accouding<T> accouding) where T : BaseItem<T>
-    {
-        accouding.AccoudingStatus = AccoudingStatus.Accepted;
-        accouding.Manager = manager;
-        return accouding;
-    }
-
-    public Accouding<T> DeclineAccouding<T>(Employee manager, Accouding<T> accouding) where T : BaseItem<T>
-    {
-        accouding.AccoudingStatus = AccoudingStatus.Declined;
-        accouding.Manager = manager;
         return accouding;
     }
 

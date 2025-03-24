@@ -68,3 +68,9 @@ D:\Programming\Projects\С#\accoudingWeb\obj\Debug\net9.0\refint\accoudingWeb.dl
 D:\Programming\Projects\С#\accoudingWeb\obj\Debug\net9.0\accoudingWeb.pdb
 D:\Programming\Projects\С#\accoudingWeb\obj\Debug\net9.0\accoudingWeb.genruntimeconfig.cache
 D:\Programming\Projects\С#\accoudingWeb\obj\Debug\net9.0\ref\accoudingWeb.dll
+D:\Programming\Projects\С#\accoudingWeb\obj\Debug\net9.0\accoudingWeb.RazorAssemblyInfo.cache
+D:\Programming\Projects\С#\accoudingWeb\obj\Debug\net9.0\accoudingWeb.RazorAssemblyInfo.cs
+D:\Programming\Projects\С#\accoudingWeb\obj\Debug\net9.0\accoudingWeb.sourcelink.json
+D:\Programming\Projects\С#\accoudingWeb\bin\Debug\net9.0\accoudingWeb.staticwebassets.runtime.json
+D:\Programming\Projects\С#\accoudingWeb\obj\Debug\net9.0\compressed\gd53itbe87-dbdxijucb1.gz
+D:\Programming\Projects\С#\accoudingWeb\obj\Debug\net9.0\compressed\v562o8wtgx-13q8fflaa9.gz

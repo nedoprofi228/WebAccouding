@@ -9,7 +9,7 @@ builder.Services.AddDbContext<ApplicationContext>();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options => //CookieAuthenticationOptions
     {
-        options.LoginPath = new PathString("/Account/Login");
+        options.LoginPath = new PathString("/Auth/Login");
     });;
 builder.Services.AddControllersWithViews();
 
@@ -20,6 +20,13 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();    // аутентификация
 app.UseAuthorization();     // авторизация
+
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Home}/{action=Index}/{id?}");
+});
 
 app.MapGet("/", () => "Hello World!");
 

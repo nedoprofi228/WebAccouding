@@ -12,6 +12,11 @@ public class ApplicationContext : DbContext
     // таблица организаций
     public DbSet<Organization> Organizations { get; set; }
     
+    //таблицы для хранения заявок
+    public DbSet<Ticket<Equipment>> TicketsEquipment { get; set; }
+    public DbSet<Ticket<OfficeEquipment>> TicketsOfficeEquipment { get; set; }
+    public DbSet<Ticket<PreciousMetals>> TicketsPreciousMetals { get; set; }
+    
     // таблицы для храниния отчетов
     public DbSet<Accouding<Equipment>> AccoudingsEquipment { get; set; }
     public DbSet<Accouding<OfficeEquipment>> AccoudingsOfficeEquipment { get; set; }
@@ -43,9 +48,9 @@ public class ApplicationContext : DbContext
         modelBuilder.Entity<Organization>().HasMany(o => o.AccoudingsPreciousMetals).WithOne(p => p.Organization);
         
         // связи многие ко многим между отчетами и предметами
-        modelBuilder.Entity<Accouding<Equipment>>().HasMany(a => a.Items).WithMany(b => b.Accoudings);
-        modelBuilder.Entity<Accouding<OfficeEquipment>>().HasMany(a => a.Items).WithMany(b => b.Accoudings);
-        modelBuilder.Entity<Accouding<PreciousMetals>>().HasMany(a => a.Items).WithMany(b => b.Accoudings);
+        modelBuilder.Entity<Ticket<Equipment>>().HasMany(a => a.Items).WithMany(b => b.Tickets);
+        modelBuilder.Entity<Ticket<OfficeEquipment>>().HasMany(a => a.Items).WithMany(b => b.Tickets);
+        modelBuilder.Entity<Ticket<PreciousMetals>>().HasMany(a => a.Items).WithMany(b => b.Tickets);
         
         base.OnModelCreating(modelBuilder);
     }
