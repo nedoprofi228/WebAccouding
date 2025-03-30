@@ -5,7 +5,7 @@ namespace accoudingWeb.Services;
 
 public class AdminService(ApplicationContext dbContext)
 {
-    public bool AddItem<T>(T item) where T : BaseItem<T>
+    public bool AddItem<T>(T item) where T : class
     {
         try
         {
@@ -20,7 +20,7 @@ public class AdminService(ApplicationContext dbContext)
         return false;
     }
 
-    public bool DeleteItem<T>(T item) where T : BaseItem<T>
+    public bool DeleteItem<T>(T item) where T : class
     {
         try
         {
@@ -35,7 +35,7 @@ public class AdminService(ApplicationContext dbContext)
         return false;
     }
 
-    public bool UpdateItem<T>(T item) where T : BaseItem<T>
+    public bool UpdateItem<T>(T item) where T : class
     {
         try
         {
@@ -50,5 +50,5 @@ public class AdminService(ApplicationContext dbContext)
         return false;
     }
 
-    public T? GetItemById<T>(int id) where T : BaseItem<T> => dbContext.Set<T>().Find(id);
+    public T? GetItemById<T>(int id) where T : class => dbContext.Set<T>().Find(id);
 }

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация</title>
+    <style>
+        /* Стили аналогичные Login.html */
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+        }
+
+        .auth-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            width: 300px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #555;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #1588ff;
+        }
+
+        .error {
+            color: #dc3545;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .link {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            margin-top: 20px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            height: 40px;
+        }
+        .btn:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+<div class="auth-container">
+    <h2>Регистрация</h2>
+    <div class="error" id="errorMessage"></div>
+    <form id="registerForm" onsubmit="SendData(event)">
+        <div class="form-group">
+            <label for="Name">Name</label>
+            <input type="text" id="Name" name="Name" required>
+        </div>
+
+        <div class="form-group">
+            <label for="Login">Логин</label>
+            <input type="text" id="Login" name="Login" required>
+        </div>
+
+        <div class="form-group">
+            <label for="Password">Пароль</label>
+            <input type="password" id="Password" name="Password" required>
+        </div>
+
+        <div class="form-group">
+            <label for="ConfirmPassword">Подтвердите пароль</label>
+            <input type="password" id="ConfirmPassword" required>
+        </div>
+
+        <button type="submit">Зарегистрироваться</button>
+    </form>
+    <div class="link">
+        Уже есть аккаунт? <a href="/auth/login">Войдите</a>
+        
+    </div>
+    <button class="btn" onclick="location.href='/'">на главную</button>
+    
+</div>
+
+<script>
+    // Валидация пароля
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+        const password = document.getElementById('Password').value;
+        const confirmPassword = document.getElementById('ConfirmPassword').value;
+
+        if (password !== confirmPassword) {
+            e.preventDefault();
+            document.getElementById('errorMessage').textContent = "Пароли не совпадают";
+            return false;
+        }
+    });
+
+    // Обработка ошибок
+    const urlParams = new URLSearchParams(window.location.search);
+    const error = urlParams.get('error');
+    if (error) {
+        document.getElementById('errorMessage').textContent = error;
+    }
+</script>
+
+<script>
+    async function SendData(e){
+        e.preventDefault();
+
+        const errorMessage = document.getElementById('errorMessage');
+        const name = document.getElementById("Name").value;
+        const login = document.getElementById("Login").value;
+        const password = document.getElementById("Password").value;
+        const confirmPassword = document.getElementById("ConfirmPassword").value;
+        
+        errorMessage.textContent = "";
+        
+        const responce = await fetch("/auth/register", {
+            headers: {
+                "Content-Type": "application/json"
+            },
+            method: "POST",
+            body: JSON.stringify({
+                Name: name,
+                Login : login,
+                Password: password,
+                ConfirmPassword: confirmPassword
+            })
+        });
+
+        if(responce.ok)
+            location.href="/";
+        else
+            errorMessage.textContent = await  responce.json()["error"] || "ошибка регистрации";
+    }
+</script>
+</body>
+</html>

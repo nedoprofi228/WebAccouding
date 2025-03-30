@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Таблица отчетов</title>
+    <style>
+        /* Стили для таблицы */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr {
+            position: relative;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+            cursor: pointer;
+        }
+
+        /* Стили для кнопки удаления в строке таблицы */
+        .delete-report-btn {
+            display: none;
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: #ff4444;
+            color: white;
+            border: none;
+            padding: 3px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .admin tr:hover .delete-report-btn {
+            display: block;
+        }
+
+        /* Стили для детальной информации */
+        .report-details {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 10px;
+        }
+        .item {
+            position: relative;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #eee;
+        }
+        .delete-btn {
+            display: none;
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: #ff4444;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .admin .item:hover .delete-btn {
+            display: block;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            margin: 10px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+<button class="btn" onclick="location.href='/'">на главную</button>
+<h1>Таблица отчетов</h1>
+
+<!-- Кнопки для выбора типа предмета -->
+<button id="loadEquipment">Оборудование</button>
+<button id="loadOfficeEquipment">Офисное оборудование</button>
+<button id="loadPreciousMetals">Драгоценные металлы</button>
+
+<!-- Таблица отчетов -->
+<table id="reportsTable">
+    <thead>
+    <tr>
+        <th>Id</th>
+        <th>Дата</th>
+        <th>Имя тикета</th>
+        <th>Статус тикета</th>
+        <th>Общая стоимость</th>
+        <th>Статус предметов</th>
+        <th>Менеджер</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- Здесь будут строки -->
+    </tbody>
+</table>
+
+<!-- Детальная информация об отчете -->
+<div id="reportDetails" class="report-details" style="display:none;">
+    <!-- Здесь будет подробная информация -->
+</div>
+
+<!-- JavaScript -->
+<script>
+    // Переменная isAdmin для управления правами администратора
+    const isAdmin = true; // Вы можете менять это значение вручную
+
+    // Добавление класса admin к body, если пользователь администратор
+    if (isAdmin) {
+        document.body.classList.add('admin');
+    }
+
+    // Обработчики кликов на кнопки
+    document.getElementById('loadEquipment').addEventListener('click', () => loadReports('equipment'));
+    document.getElementById('loadOfficeEquipment').addEventListener('click', () => loadReports('officeEquipment'));
+    document.getElementById('loadPreciousMetals').addEventListener('click', () => loadReports('preciousMetals'));
+    const tbody = document.querySelector('#reportsTable tbody');
+    const detailsDiv = document.getElementById('reportDetails');
+
+    // Функция для загрузки отчетов с сервера
+    async function loadReports(type) {
+        try {
+            tbody.innerHTML = '';
+            detailsDiv.innerHTML = '';
+            const response = await fetch(`/accoudings/${type}`);
+            if (!response.ok) throw new Error('Ошибка загрузки данных');
+            const reports = await response.json();
+            displayReports(reports, type);
+        } catch (error) {
+            console.error('Ошибка:', error);
+        }
+    }
+
+    // Функция для отображения отчетов в таблице
+    function displayReports(reports, type) {
+        tbody.innerHTML = ''; // Очистка таблицы
+        reports.forEach(report => {
+            const tr = document.createElement('tr');
+            tr.setAttribute('data-type', type);
+            tr.setAttribute('data-report-id', report.Id);
+
+            // Добавляем кнопку удаления отчета
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-report-btn';
+            deleteBtn.textContent = '×';
+            deleteBtn.title = 'Удалить отчет';
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Предотвращаем всплытие события
+                deleteReport(report.Id, type);
+            });
+
+            tr.innerHTML = `
+                    <td>${report.Id}</td>
+                    <td>${new Date(report.Date).toLocaleDateString()}</td>
+                    <td>${report.Ticket.Name}</td>
+                    <td>${report.Ticket.TicketStatus}</td>
+                    <td>${report.Ticket.TotalPrice}</td>
+                    <td>${report.Ticket.ItemStatus}</td>
+                    <td>${report.Manager.Name}</td>
+                `;
+            tr.appendChild(deleteBtn);
+            tr.addEventListener('click', () => showReportDetails(report, type));
+            tbody.appendChild(tr);
+        });
+    }
+
+    // Функция для удаления отчета
+    async function deleteReport(reportId, type) {
+        if (confirm('Вы уверены, что хотите удалить этот отчет?')) {
+            try {
+                const response = await fetch(`/accoudings/${type}/${reportId}`, {
+                    method: 'DELETE'
+                });
+                if (!response.ok) throw new Error('Ошибка удаления отчета');
+                loadReports(type); // Перезагружаем список отчетов
+            } catch (error) {
+                console.error('Ошибка:', error);
+                alert('Не удалось удалить отчет');
+            }
+        }
+    }
+
+    // Функция для отображения подробной информации об отчете
+    function showReportDetails(report, type) {
+        detailsDiv.innerHTML = `
+                <h3>Отчет Id: ${report.Id}</h3>
+                <p><strong>Дата:</strong> ${new Date(report.Date).toLocaleDateString()}</p>
+                <p><strong>Имя тикета:</strong> ${report.Ticket.Name}</p>
+                <p><strong>Общая стоимость:</strong> ${report.Ticket.TotalPrice}</p>
+                <p><strong>Статус предметов:</strong> ${report.Ticket.ItemStatus}</p>
+                <p><strong>Менеджер:</strong> ${report.Manager.Name}</p>
+                <h4>Предметы:</h4>
+                <div id="itemsList"></div>
+            `;
+        const itemsList = document.getElementById('itemsList');
+        report.Ticket.Items.forEach(item => {
+            const itemDiv = document.createElement('div');
+            itemDiv.classList.add('item');
+            itemDiv.setAttribute('data-item-id', item.Name); // Используем Name как идентификатор
+            itemDiv.setAttribute('data-item-id', item.Name); // Используем Name как идентификатор
+
+            let itemHtml = '';
+            switch (type) {
+                case 'equipment':
+                    itemHtml = `
+                            <h5>Оборудование</h5>
+                            <ul>
+                                <li><strong>Название:</strong> ${item.Name}</li>
+                                <li><strong>Цена:</strong> ${item.Price}</li>
+                            </ul>
+                        `;
+                    break;
+                case 'officeEquipment':
+                    itemHtml = `
+                            <h5>Офисное оборудование</h5>
+                            <ul>
+                                <li><strong>Название:</strong> ${item.Name}</li>
+                                <li><strong>Цена:</strong> ${item.Price}</li>
+                                <li><strong>Тип принтера:</strong> ${item.PrinterType}</li>
+                            </ul>
+                        `;
+                    break;
+                case 'preciousMetals':
+                    itemHtml = `
+                            <h5>Драгоценные металлы</h5>
+                            <ul>
+                                <li><strong>Название:</strong> ${item.Name}</li>
+                                <li><strong>Цена:</strong> ${item.Price}</li>
+                                <li><strong>Вес:</strong> ${item.Weight}</li>
+                                <li><strong>Драгоценность:</strong> ${item.Precious}</li>
+                            </ul>
+                        `;
+                    break;
+            }
+
+            itemDiv.innerHTML = itemHtml;
+            itemsList.appendChild(itemDiv);
+        });
+        detailsDiv.style.display = 'block';
+    }
+
+    
+</script>
+</body>
+</html>

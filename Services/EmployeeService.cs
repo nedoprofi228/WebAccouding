@@ -16,7 +16,7 @@ public class EmployeeService(TicketService ticketService, ApplicationContext dbC
         return await dbContext.SaveChangesAsync() > 0;
     }
 
-    public async Task<bool> DeleteTicket<T>(Employee employee, long id) where T : BaseItem<T>
+    public async Task<bool> DeleteTicket<T>(Employee employee, long id) 
     {
         var ticket = await dbContext.Set<Ticket<T>>()
             .FirstOrDefaultAsync(a => a.Id == id);
@@ -31,15 +31,18 @@ public class EmployeeService(TicketService ticketService, ApplicationContext dbC
     public async Task<bool> UpdateTicket<T>(Employee employee,long id, TicketModel<T> newTicketModel) where T : BaseItem<T>
     {
         var ticket = dbContext.Set<Ticket<T>>()
+            .Include(t => t.Items)
             .FirstOrDefault(a => a.Id == id);
         
         if(ticket == null)
             return false;
 
         ticket.Name = newTicketModel.Name;
-        ticket.Items = newTicketModel.Items;
+        ticket.Items = dbContext.Set<T>().Where(i => newTicketModel.ItemsId.Contains(i.Id)).ToList();
         ticket.TotalPrice = newTicketModel.TotalPrice;
         ticket.ItemStatus = newTicketModel.ItemStatus;
-        return await dbContext.SaveChangesAsync() > 0;
+        dbContext.Update(ticket);
+        await dbContext.SaveChangesAsync();
+        return true;
     }
 }

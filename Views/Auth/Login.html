@@ -1,1 +1,154 @@
-<html><head><meta name="color-scheme" content="light dark"></head><body><pre style="word-wrap: break-word; white-space: pre-wrap;">Hello World!</pre></body></html>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход в систему</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+        }
+
+        .auth-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            width: 300px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #555;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .error {
+            color: #dc3545;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .link {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            margin-top: 20px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            height: 40px;
+        }
+        .btn:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+<div class="auth-container">
+    <h2>Вход</h2>
+    <div class="error" id="errorMessage"></div>
+    <form id="loginForm" onsubmit="SigIn(event)">
+        <div class="form-group">
+            <label for="Login">Логин</label>
+            <input type="text" id="Login" name="Login" required>
+        </div>
+        <div class="form-group">
+            <label for="Password">Пароль</label>
+            <input type="password" id="Password" name="Password" required>
+        </div>
+        <button type="submit">Войти</button>
+    </form>
+    <div class="link">
+        Нет аккаунта? <a href="/auth/register">Зарегистрируйтесь</a>
+        <button class="btn" onclick="location.href='/'">на главную</button>
+    </div>
+    
+</div>
+<script>
+    async function SigIn(e){
+        e.preventDefault();
+
+        const error = document.getElementById('errorMessage');
+        const login = document.getElementById("Login");
+        const password = document.getElementById("Password");
+
+        error.textContent = "";
+        const responce = await fetch("/auth/login", {
+            headers: {
+                "Content-Type": "application/json"
+            },
+            method: "POST",
+            body: JSON.stringify({
+                Login : login.value,
+                Password: password.value,
+            })
+        });
+        if(responce.ok)
+            location.href="/";
+        else
+            error.textContent = await  responce.json()["error"] || "ошибка регистрации";
+    }
+</script>
+<script>
+    // Обработка отображения ошибок из query string
+    const urlParams = new URLSearchParams(window.location.search);
+    const error = urlParams.get('error');
+    if (error) {
+        document.getElementById('errorMessage').textContent = error;
+    }
+</script>
+</body>
+</html>

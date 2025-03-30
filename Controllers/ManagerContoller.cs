@@ -3,79 +3,77 @@ using System.Text.Json;
 using accoudingWeb.DataBase;
 using accoudingWeb.Entities;
 using accoudingWeb.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace accoudingWeb.Controllers;
 
-[Route("api/manager")]
-public class ManagerContoller(ApplicationContext dbContext, ManagerService managerService) : Controller
+// требуется авторизация, а роли должный быть Админ или Менеджер
+// маршрутизация по запросу manager
+[ApiController]
+[Authorize(Roles = "Admin, Manager")]
+[Route("manager")]
+public class ManagerController(ApplicationContext dbContext, ManagerService managerService) : ControllerBase
 {
-
-    [HttpGet("/accaudings/{type}")]
-    public async Task GetAccoudingEquiment(HttpContext context, string type)
+    
+    /// <summary>
+    /// метод отправляющий html документ
+    /// </summary>
+    /// <param name="context"></param>
+    [HttpGet]
+    public async Task GetView()
     {
-        string accoudings = string.Empty;
-        switch (type)
-        {
-            case "equiment":
-                accoudings = JsonSerializer.Serialize(dbContext.AccoudingsEquipment.ToList());
-                break;
-            case "officeEquipment":
-                accoudings = JsonSerializer.Serialize(dbContext.AccoudingsOfficeEquipment.ToList());
-                break;
-            case "preciousMetals":
-                accoudings = JsonSerializer.Serialize(dbContext.AccoudingsPreciousMetals.ToList());
-                break;
-        }
-        context.Response.ContentType = "application/json";
-        await context.Response.WriteAsync(accoudings);
+        await Response.SendFileAsync("./Views/Working/Manager.html");
     }
     
-    [HttpPost("/tickets/{type}/{ticketId}/{action}")]
-    public async Task<IActionResult> AcceptPreciousMetalsTicket(HttpContext context,string type, long ticketId, string action)
+    /// <summary>
+    /// метод закрытия тикета
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="type">Тип объекта тикета</param>
+    /// <param name="ticketId">id нужного тикета</param>
+    /// <param name="action1"> Действие над тикетом, принять или отклонить</param>
+    /// <returns></returns>
+    [HttpPost("tickets/{type}/{ticketId}/{action1}")]
+    public async Task<IActionResult> CloseTicket([FromRoute] string type, [FromRoute] long ticketId, [FromRoute] string action1)
     {
-        var manager = new Employee();
-        if(action == "accept")
-            switch (type)
+        var manager = dbContext.Users
+            .FirstOrDefault(u => u.Login == HttpContext.User.Identity.Name);
+
+        return type switch
         {
-            case "equipment":
-                if(action == "accept")
-                {
-                    if (!await managerService.AcceptTicketAsync<Equipment>(manager, ticketId))
-                        return BadRequest();
-                }
-                else if(action == "decline")
-                {
-                    if (!await managerService.DeclineTicketAsync<Equipment>(manager, ticketId))
-                        return BadRequest();
-                }
-                
-                break;
-            case "officeEquipment":
-                if(action == "accept")
-                {
-                    if (!await managerService.AcceptTicketAsync<OfficeEquipment>(manager, ticketId))
-                        return BadRequest();
-                }
-                else if(action == "decline")
-                {
-                    if (!await managerService.DeclineTicketAsync<OfficeEquipment>(manager, ticketId))
-                        return BadRequest();
-                }
-                break;
-            case "preciousMetals":
-                if(action == "accept")
-                {
-                    if (!await managerService.AcceptTicketAsync<PreciousMetals>(manager, ticketId))
-                        return BadRequest();
-                }
-                else if(action == "decline")
-                {
-                    if (!await managerService.DeclineTicketAsync<PreciousMetals>(manager, ticketId))
-                        return BadRequest();
-                }
-                break;
-        }
+            "equipment"       => 
+                await HandleAction<Equipment>(action1, ticketId, manager),
+            "officeEquipment" => 
+                await HandleAction<OfficeEquipment>(action1, ticketId, manager),
+            "preciousMetals"  => 
+                await HandleAction<PreciousMetals>(action1, ticketId, manager),
+            _                 => 
+                BadRequest(ModelState)
+        };
+    }
+
+    /// <summary>
+    ///  обощенный вспомогаеющий метод для закрытия тикета
+    /// </summary>
+    /// <param name="action"></param>
+    /// <param name="ticketId"></param>
+    /// <param name="manager"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    private async Task<IActionResult> HandleAction<T>(string action, long ticketId, Employee manager)
+        where T : class
+    {
+        var result = action switch
+        {
+            "accept"  => await managerService.AcceptTicketAsync<T>(manager, ticketId),
+            "decline" => await managerService.DeclineTicketAsync<T>(manager, ticketId),
+            _         => false
+        };
+
+        if (!result) 
+            return BadRequest(ModelState);
         
         return Ok();
     }

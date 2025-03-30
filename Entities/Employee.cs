@@ -6,10 +6,10 @@ public class Employee
     public string Name { get; set; } = String.Empty;
     public string Login { get; set; } = string.Empty;
     public string Password { get; set; } = String.Empty;
-    public Role Role { get; set; } = Role.Employee;
+    public string Role { get; set; } = string.Empty;
     
-    public long OrganizationId { get; set; }
-    public Organization Organization { get; set; }
+    /*public long OrganizationId { get; set; }
+    public Organization Organization { get; set; }*/
 }
 
 public enum Role

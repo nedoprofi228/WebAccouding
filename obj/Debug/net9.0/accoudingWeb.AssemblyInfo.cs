@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("accoudingWeb")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1d80c969b7867f6366f1e1937701c5a12f107979")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c1fed0e6d23ab1bd2dc59b609caf02defb884084")]
 [assembly: System.Reflection.AssemblyProductAttribute("accoudingWeb")]
 [assembly: System.Reflection.AssemblyTitleAttribute("accoudingWeb")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

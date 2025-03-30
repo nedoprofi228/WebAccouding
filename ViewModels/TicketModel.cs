@@ -8,8 +8,8 @@ public class TicketModel<T>
     [Required]
     public string Name { get; set; } 
     [Required]
-    public List<T> Items { get; set; }
+    public List<long> ItemsId { get; set; }
     public decimal TotalPrice { get; set; } = -1;
-    public ItemStatus ItemStatus { get; set; }
+    public string ItemStatus { get; set; }
 
 }

@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админка вещей</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Roboto', sans-serif;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 2rem;
+            background-color: #f5f7fa;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 2rem;
+            font-weight: 500;
+        }
+
+        h2 {
+            color: #34495e;
+            margin: 2rem 0 1rem;
+            font-weight: 500;
+        }
+
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 1rem;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        th {
+            background-color: #3498db;
+            color: white;
+            font-weight: 500;
+        }
+
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .actions button {
+            padding: 0.4rem 0.8rem;
+            margin: 0 0.2rem;
+            font-size: 0.9rem;
+        }
+
+        .actions button.delete {
+            background-color: #e74c3c;
+        }
+
+        .actions button.delete:hover {
+            background-color: #c0392b;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        label {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        input, select {
+            padding: 0.8rem;
+            border: 1px solid #bdc3c7;
+            border-radius: 5px;
+            font-size: 1rem;
+            width: 100%;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .close {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #7f8c8d;
+            transition: color 0.3s;
+        }
+
+        .close:hover {
+            color: #34495e;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        #type-display-container {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 1rem;
+        }
+
+        #type-display {
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            th, td {
+                padding: 0.8rem;
+            }
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            margin: 10px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+<button class="btn" onclick="location.href='/'">на главную</button>
+<h1>📁 Панель админа</h1>
+<button onclick="openModal('add')">➕ добавить предмет</button>
+
+<div id="modal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2 id="modal-title">Add New Item</h2>
+        <form id="item-form">
+            <div id="type-selector-container">
+                <label for="type">Item Type:</label>
+                <select id="type" onchange="updateFormFields()">
+                    <option value="equipment">Оборудование</option>
+                    <option value="officeEquipment">Оргтехника</option>
+                    <option value="preciousMetals">драгоценные металлы</option>
+                </select>
+            </div>
+            <div id="type-display-container" style="display: none;">
+                <label>Item Type:</label>
+                <span id="type-display"></span>
+            </div>
+            <div id="form-fields"></div>
+            <button type="submit" style="margin-top: 1rem;">💾 сохранить</button>
+        </form>
+    </div>
+</div>
+
+<div class="table-container">
+    <h2>🖥️ Оборудование</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>Имя</th>
+            <th>Цена</th>
+            <th>Тип</th>
+            <th>Действия</th>
+        </tr>
+        </thead>
+        <tbody id="equipment-table"></tbody>
+    </table>
+</div>
+
+<div class="table-container">
+    <h2>🖨️ Оргтехника</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>Имя</th>
+            <th>Цена</th>
+            <th>Тип оргтехники</th>
+            <th>Действия</th>
+        </tr>
+        </thead>
+        <tbody id="officeEquipment-table"></tbody>
+    </table>
+</div>
+
+<div class="table-container">
+    <h2>💎 Драгоценные металлы</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>Имя</th>
+            <th>Цена</th>
+            <th>Вес</th>
+            <th>Проба</th>
+            <th>Действия</th>
+        </tr>
+        </thead>
+        <tbody id="preciousMetals-table"></tbody>
+    </table>
+</div>
+
+<script>
+    let currentItemId = null;
+    let currentType = null;
+
+    async function fetchItems(type) {
+        const response = await fetch(`/items/${type.toLowerCase()}`);
+        if (response.ok) {
+            const items = await response.json();
+            const tableBody = document.getElementById(`${type}-table`);
+            tableBody.innerHTML = '';
+            items.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.Name}</td>
+                    <td>${item.Price}</td>`;
+                
+                if (type !== 'preciousMetals') {
+                    row.innerHTML += `<td>${item.EquipmentType || item.PrinterType || item.Weight}</td>`
+                }
+                
+                if (type === 'preciousMetals') {
+                    row.innerHTML += `<td>${item.Weight}</td>`;
+                    row.innerHTML += (`<td>${item.Precious}</td>`);
+                }
+                
+                row.innerHTML += `
+                    <td class="actions">
+                        <button class="action-btn edit-btn" 
+                                onclick="openModal('edit', '${type}', ${item.Id})">
+                            ✏️ редактировать
+                        </button>
+                        <button class="action-btn delete-btn" 
+                                onclick="deleteItem('${type}', ${item.Id})">
+                            🗑️ удалить
+                        </button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+    }
+
+    function openModal(action, type = null, id = null) {
+        currentItemId = id;
+        currentType = type;
+        const isEdit = action === 'edit';
+
+        document.getElementById('modal-title').textContent = isEdit ? 'Edit Item' : 'Add Item';
+        document.getElementById('type-selector-container').style.display = isEdit ? 'none' : 'block';
+        document.getElementById('type-display-container').style.display = isEdit ? 'block' : 'none';
+
+        if (isEdit) {
+            document.getElementById('type-display').textContent = type;
+            document.getElementById('type').value = type;
+        } else {
+            document.getElementById('type').value = 'equipment';
+        }
+
+        updateFormFields();
+        document.getElementById('modal').style.display = 'block';
+    }
+
+    function closeModal() {
+        document.getElementById('modal').style.display = 'none';
+    }
+
+    function updateFormFields() {
+        const type = document.getElementById('type').value;
+        const formFields = document.getElementById('form-fields');
+        formFields.innerHTML = '';
+
+        if (type === 'equipment') {
+            formFields.innerHTML = `
+                <label for="name">Название:</label>
+                <input type="text" id="name" required>
+                <label for="price">Цена:</label>
+                <input type="number" id="price" required>
+                <label for="equipmentType">Тип оборудования:</label>
+                <input type="text" id="equipmentType" required>
+            `;
+        } else if (type === 'officeEquipment') {
+            formFields.innerHTML = `
+                <label for="name">Название:</label>
+                <input type="text" id="name" required>
+                <label for="price">Цена:</label>
+                <input type="number" id="price" required>
+                <label for="printerType">Тип оргтехники:</label>
+                <input type="text" id="printerType" required>
+            `;
+        } else if (type === 'preciousMetals') {
+            formFields.innerHTML = `
+                    <label for="name">Название:</label><br>
+                    <input type="text" id="name" required><br>
+                    <label for="price">Цена:</label><br>
+                    <input type="number" id="price" required><br>
+                    <label for="weight">Вес:</label><br>
+                    <input type="number" id="weight" required><br>
+                    <label for="precious">Проба:</label><br>
+                    <input type="number" id="precious" required><br>
+                `;
+        }
+    }
+
+    document.getElementById('item-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const type = currentItemId ? currentType : document.getElementById('type').value;
+        const data = {
+            name: document.getElementById('name').value,
+            price: document.getElementById('price').value,
+        };
+
+        if (type === 'equipment') {
+            data.equipmentType = document.getElementById('equipmentType').value;
+        } else if (type === 'officeEquipment') {
+            data.printerType = document.getElementById('printerType').value;
+        } else if (type === 'preciousMetals') {
+            data.weight = document.getElementById('weight').value;
+            data.precious = document.getElementById('precious').value;
+        }
+
+        const method = currentItemId ? 'PUT' : 'POST';
+        const url = currentItemId ? `/admin/items/${type}?id=${currentItemId}` : `/admin/items/${type}`;
+
+        const response = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
+
+        if (response.ok) {
+            closeModal();
+            await fetchItems(type);
+            currentItemId = null;
+            currentType = null;
+        }
+    });
+
+    async function deleteItem(type, id) {
+        if (confirm('Are you sure you want to delete this item?')) {
+            const response = await fetch(`/admin/items/${type}/${id}`, { method: 'DELETE' });
+            if (response.ok) {
+                fetchItems(type);
+            }
+        }
+    }
+
+    // Initial load
+    window.addEventListener('load', () => {
+        fetchItems('equipment');
+        fetchItems('officeEquipment');
+        fetchItems('preciousMetals');
+    });
+</script>
+</body>
+</html>

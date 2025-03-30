@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление заявками</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .buttons { display: none; }
+        tr:hover .buttons { display: flex; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
+        .modal-content { background: white; padding: 20px; width: 50%; border-radius: 8px; }
+        .table-container { max-height: 400px; overflow-y: auto; }
+        .loading { display: none; text-align: center; padding: 10px; }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            margin: 10px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-6">
+<button class="btn" onclick="location.href='/'">на главную</button>
+<div class="container mx-auto">
+    <h1 class="text-2xl font-bold mb-4">Управление заявками</h1>
+
+    <!-- Таблица заявок -->
+    <div class="table-container bg-white shadow rounded-lg">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50 sticky top-0">
+            <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Название</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Цена</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Тип предмета</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Тип заявки</th>
+            </tr>
+            </thead>
+            <tbody id="ticketsTable" class="bg-white divide-y divide-gray-200"></tbody>
+        </table>
+        <div id="loading" class="loading">Загрузка...</div>
+    </div>
+
+    <!-- Кнопка добавить заявку -->
+    <button id="addTicketBtn" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Добавить заявку</button>
+</div>
+
+<!-- Модальное окно -->
+<div id="modal" class="modal">
+    <div class="modal-content">
+        <h2 id="modalTitle" class="text-xl font-bold mb-4">Новая заявка</h2>
+        <form id="ticketForm">
+            <!-- Поле названия заявки -->
+            <div class="mb-4">
+                <label for="ticketName" class="block text-sm font-medium text-gray-700">Название заявки*</label>
+                <input type="text" id="ticketName" name="Name" required
+                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+            </div>
+
+            <!-- Выбор типа заявки -->
+            <div class="mb-4">
+                <label for="itemStatus" class="block text-sm font-medium text-gray-700">Тип заявки*</label>
+                <select id="itemStatus" name="itemStatus" required
+                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                    <option value="Repair">Ремонт</option>
+                    <option value="Buy">Покупка</option>
+                    <option value="WriteOf">Списание</option>
+                </select>
+            </div>
+
+            <!-- Выбор типа предмета -->
+            <div id="typeSelector" class="mb-4">
+                <label for="ticketType" class="block text-sm font-medium text-gray-700">Тип предмета*</label>
+                <select id="ticketType" name="ticketType" required
+                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                    <option value="Equipment">Оборудование</option>
+                    <option value="OfficeEquipment">Офисное оборудование</option>
+                    <option value="PreciousMetals">Драгоценные металлы</option>
+                </select>
+            </div>
+
+            <!-- Список предметов -->
+            <div id="existingItemsSelect" class="mb-4">
+                <label for="itemSelect" class="block text-sm font-medium text-gray-700">Выберите предметы:</label>
+                <select id="itemSelect" name="itemSelect" multiple
+                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm h-32">
+                </select>
+                <p class="mt-1 text-sm text-gray-500">Используйте Ctrl/Cmd для выбора нескольких элементов</p>
+            </div>
+            <label for="totalPriceDisplay" class="block text-sm font-medium text-gray-700">Цена:</label>
+            <input id="totalPriceDisplay" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"/>
+
+            <!-- Кнопки формы -->
+            <div class="mt-6 flex justify-end space-x-2">
+                <button type="button" id="cancelBtn" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Отмена</button>
+                <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Сохранить</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const modal = document.getElementById('modal');
+    const ticketForm = document.getElementById('ticketForm');
+    const ticketTypeSelect = document.getElementById('ticketType');
+    const itemStatusSelect = document.getElementById('itemStatus');
+    const addTicketBtn = document.getElementById('addTicketBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const modalTitle = document.getElementById('modalTitle');
+    const ticketsTable = document.getElementById('ticketsTable');
+    const loading = document.getElementById('loading');
+    const itemSelect = document.getElementById('itemSelect');
+    const ticketNameInput = document.getElementById('ticketName');
+    const priceInput = document.getElementById("totalPriceDisplay")
+
+    var sum = 0;
+    let editingTicket = null;
+    let currentItems = []; // Глобальная переменная для хранения предметов
+
+    itemSelect.addEventListener('change', updateTotalPrice); // Обновление цены при изменении выбора
+
+    async function fetchTickets() {
+        loading.style.display = 'block';
+        try {
+            ticketsTable.innerHTML = '';
+            const response = await fetch('/tickets/pending/equipment');
+            renderTickets(await response.json(), "Equipment");
+            const response2 = await fetch('/tickets/pending/officeEquipment');
+            renderTickets(await response2.json(), "OfficeEquipment");
+            const response3 = await fetch('/tickets/pending/preciousMetals');
+            renderTickets(await response3.json(), "PreciousMetals");
+        } catch (error) {
+            console.error('Ошибка при загрузке заявок:', error);
+            alert('Не удалось загрузить заявки');
+        } finally {
+            loading.style.display = 'none';
+        }
+    }
+
+    function renderTickets(tickets, ticketType) {
+        tickets.forEach(ticket => {
+            var row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="buttons flex space-x-2">
+                        <button class="editBtn text-blue-600 hover:text-blue-800" 
+                                data-id="${ticket.Id}" 
+                                data-type="${ticketType}">Редактировать</button>
+                        <button class="deleteBtn text-red-600 hover:text-red-800" 
+                                data-id="${ticket.Id}" 
+                                data-type="${ticketType}">Удалить</button>
+                    </div>
+                </td>
+                <td class="px-6 py-4">
+                    <div>${ticket.Name}</div>
+                    ${ticket.itemsId?.length > 0 ?
+                `<div class="text-sm text-gray-500">Предметы: ${ticket.itemsId.join(', ')}</div>` : ''}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">${ticket.TotalPrice}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${ticketType}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                        ${ticket.ItemStatus}
+                    </span>
+                </td>
+            `;
+            ticketsTable.appendChild(row);
+        });
+
+        document.querySelectorAll('.editBtn').forEach(btn => btn.addEventListener('click', handleEdit));
+        document.querySelectorAll('.deleteBtn').forEach(btn => btn.addEventListener('click', handleDelete));
+    }
+
+    async function loadItems(type) {
+        try {
+            const response = await fetch(`/items/${type.toLowerCase()}`);
+            currentItems = await response.json();
+            return currentItems;
+        } catch (error) {
+            console.error('Ошибка при загрузке предметов:', error);
+            return [];
+        }
+    }
+
+    async function updateItemSelect(type, selectedIds = []) {
+        const items = await loadItems(type);
+        itemSelect.innerHTML = '';
+        items.forEach(item => {
+            const option = document.createElement('option');
+            option.value = item.Id;
+            option.textContent = `${item.Name} - ${item.Price}`;
+            option.selected = selectedIds.includes(item.Id);
+            option.Price = item.Price;
+            itemSelect.appendChild(option);
+        });
+        updateTotalPrice();
+    }
+
+    
+    function updateTotalPrice() {
+        const selectedOptions = Array.from(itemSelect.selectedOptions);
+        sum = 0;
+        selectedOptions.forEach(selected => {
+            sum += selected.Price;
+        });
+        
+        priceInput.value = sum;
+    }
+
+    addTicketBtn.addEventListener('click', async () => {
+        editingTicket = null;
+        modalTitle.textContent = 'Новая заявка';
+        ticketNameInput.value = '';
+        await updateItemSelect(ticketTypeSelect.value);
+        modal.style.display = 'block';
+    });
+
+    ticketTypeSelect.addEventListener('change', async () => {
+        const type = ticketTypeSelect.value;
+        await updateItemSelect(type);
+    });
+
+    cancelBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+        ticketForm.reset();
+    });
+
+    async function  handleEdit(event) {
+        const id = event.target.dataset.id;
+        console.log(id);
+        const type = event.target.dataset.type.toLowerCase();
+        try {
+            const response = await fetch(`/tickets/${type}/${id}`);
+            const ticket = await response.json();
+            editingTicket = { id: id, type: ticketTypeSelect.value };
+
+            ticketNameInput.value = ticket.Name;
+            itemStatusSelect.value = ticket.ItemStatus;
+            ticketTypeSelect.value = type.charAt(0).toUpperCase() + type.slice(1);
+            await updateItemSelect(ticketTypeSelect.value, ticket.itemsId || []);
+            modalTitle.textContent = 'Редактировать заявку';
+            modal.style.display = 'block';
+            
+        } catch (error) {
+            console.error('Ошибка при загрузке заявки для редактирования:', error);
+            alert('Не удалось загрузить заявку');
+        }
+    }
+
+    async function handleDelete(event) {
+        const id = event.target.dataset.id;
+        const type = event.target.dataset.type.toLowerCase();
+        if (confirm('Вы уверены, что хотите удалить эту заявку?')) {
+            try {
+                await fetch(`/tickets/${type}/${id}`, { method: 'DELETE' });
+                fetchTickets();
+            } catch (error) {
+                console.error('Ошибка при удалении:', error);
+            }
+        }
+    }
+
+    ticketForm.addEventListener('submit', async (e) => SaveTicket(e));
+
+    async function SaveTicket(e){
+        {
+            e.preventDefault();
+
+            const selectedOptions = Array.from(itemSelect.selectedOptions);
+
+            const requestBody = {
+                Name: ticketNameInput.value,
+                ItemStatus: itemStatusSelect.value,
+                ItemsId: selectedOptions.map(option => option.value),
+                TotalPrice: priceInput.value
+            };
+
+            if (!requestBody.Name || requestBody.ItemsId.length === 0) {
+                alert('Заполните обязательные поля: Название и выберите предметы');
+                return;
+            }
+
+            const ticketType = ticketTypeSelect.value;
+            const url = editingTicket
+                ? `/tickets/${editingTicket.type.toLowerCase()}/${editingTicket.id}`
+                : `/tickets/${ticketType.toLowerCase()}`;
+
+            try {
+                const response = await fetch(url, {
+                    method: editingTicket ? 'PUT' : 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) throw new Error('Ошибка сохранения');
+
+                modal.style.display = 'none';
+                ticketForm.reset();
+                await fetchTickets();
+            } catch (error) {
+                console.error('Ошибка при сохранении:', error);
+                alert('Не удалось сохранить заявку');
+            }
+        }
+    }
+    fetchTickets();
+</script>
+</body>
+</html>

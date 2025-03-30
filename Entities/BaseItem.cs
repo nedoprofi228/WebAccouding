@@ -10,5 +10,5 @@ public class BaseItem<T>
     public int Count { get; set; } = 0;
     
     public List<Organization> Organizations { get; set; } = [];
-    public List<Ticket<T>> Tickets { get; set; } = [];
+    public List<Ticket<T>> Tickets { get; set; } = []; 
 }

@@ -1,10 +1,110 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Главная страница</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+        .container {
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            margin-bottom: 30px;
+            color: #333;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            margin: 10px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #45a049;
+        }
+        .btn-login {
+            background-color: #2196F3;
+        }
+        .btn-login:hover {
+            background-color: #0b7dda;
+        }
+        .btn-accoudings {
+            background-color: #2196F3;
+            width: 200px;
+        }
+        .btn-accoudings:hover {
+            background-color: #0b7dda;
+        }
+        .btn-employee {
+            background-color: #ff9800;
+        }
+        .btn-employee:hover {
+            background-color: #e68a00;
+        }
+        .btn-manager {
+            background-color: #9c27b0;
+        }
+        .btn-manager:hover {
+            background-color: #7b1fa2;
+        }
+        
+        .btn-admin {
+            background-color: #28a745;
+        }
+        .btn-admin:hover {
+            background-color: #218838;
+        }
+        
+    </style>
 </head>
 <body>
+<div class="container">
+    <h1>Добро пожаловать</h1>
 
+    <button class="btn btn-login" onclick="location.href='/auth/login'">Войти</button>  <br>
+    <form onsubmit="logout(event)">
+        <button class="btn btn-login" type="submit">Выйти</button>
+    </form>
+
+    <div style="margin-top: 30px;">
+        <p>Или продолжить как:</p>
+        <button class="btn btn-employee" onclick="location.href='/employee'">Сотрудник</button>
+        <button class="btn btn-manager" onclick="location.href='/manager'">Менеджер</button>
+        <button class="btn btn-admin" onclick="location.href='/admin'">Админ</button>
+    </div>
+    <br>
+    <button class="btn btn-accoudings" onclick="location.href='/accoudings'">Отчеты</button>
+</div>
+
+<script>
+    async function logout(e){
+        e.preventDefault();
+        
+        await fetch("/auth/logout", {
+            method : "POST"
+        });
+        
+        alert("вы вышли из аккаунта");
+    }
+</script>
 </body>
 </html>

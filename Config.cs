@@ -2,5 +2,5 @@ namespace accoudingWeb;
 
 public class Config
 {
-    public string ConnetionString => "Data Source=WebApp.db";
+    public static string ConnectionString => "Data Source=WebApp2.db";
 }

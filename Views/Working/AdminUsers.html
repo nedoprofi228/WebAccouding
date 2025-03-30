@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админка пользователей</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Roboto', sans-serif;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 2rem;
+            background-color: #f5f7fa;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 2rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        th {
+            background-color: #3498db;
+            color: white;
+            font-weight: 500;
+        }
+
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .actions {
+            width: 120px;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        tr:hover .actions {
+            opacity: 1;
+        }
+
+        .action-btn {
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .edit-btn {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .edit-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .delete-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            th, td {
+                padding: 0.8rem;
+            }
+
+            .actions {
+                opacity: 1;
+            }
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            margin: 10px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+<button class="btn" onclick="location.href='/'">на главную</button>
+<h1>👥 Управление пользователями</h1>
+
+<div class="table-container">
+    <table>
+        <thead>
+        <tr>
+            <th>Логин</th>
+            <th>Роль</th>
+            <th class="actions">Actions</th>
+        </tr>
+        </thead>
+        <tbody id="users-body">
+        
+        </tbody>
+    </table>
+</div>
+
+<script>
+    async function fetchUsers() {
+        try {
+            const response = await fetch('/admin/users/list');
+            if (!response.ok) throw new Error('Failed to fetch users');
+            const users = await response.json();
+            const tableBody = document.getElementById('users-body');
+            tableBody.innerHTML = '';
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                const upDisabled = user.role === 'Admin' ? 'disabled' : '';
+                const downDisabled = user.role === 'Employee' ? 'disabled' : '';
+                row.innerHTML = `
+                        <td>${user.Login}</td>
+                        <td>${user.Role}</td>
+                        <td class="actions">
+                            <button class="action-btn edit-btn" onclick="upRole('${user.Login}')" ${upDisabled}>Повысить</button>
+                            <button class="action-btn delete-btn" onclick="downRole('${user.Login}')" ${downDisabled}>Понизить</button>
+                        </td>
+                    `;
+                tableBody.appendChild(row);
+            });
+        } catch (error) {
+            console.error('Error fetching users:', error);
+        }
+    }
+
+    async function upRole(login) {
+        try {
+            const response = await fetch(`/admin/users/${login}/up`, { method: 'POST' });
+            if (!response.ok) throw new Error('Failed to up role');
+            refreshTable();
+        } catch (error) {
+            console.error('Error upping role:', error);
+        }
+    }
+
+    async function downRole(login) {
+        try {
+            const response = await fetch(`/admin/users/${login}/down`, { method: 'POST' });
+            if (!response.ok) throw new Error('Failed to down role');
+            refreshTable();
+        } catch (error) {
+            console.error('Error downing role:', error);
+        }
+    }
+
+    function refreshTable() {
+        fetchUsers();
+    }
+
+    // Загрузка пользователей при загрузке страницы
+    fetchUsers();
+</script>
+</body>
+</html>
