@@ -365,11 +365,13 @@
     document.getElementById('item-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const type = currentItemId ? currentType : document.getElementById('type').value;
-        const data = {
-            name: document.getElementById('name').value,
-            price: document.getElementById('price').value,
-        };
+        var data = {};
+        
+        console.log(document.getElementById('name').value);
+        data.name = document.getElementById('name').value;
+        data.price = document.getElementById('price').value;
 
+        
         if (type === 'equipment') {
             data.equipmentType = document.getElementById('equipmentType').value;
         } else if (type === 'officeEquipment') {

@@ -28,7 +28,6 @@ D:\Programming\Projects\С#\accoudingWeb\bin\Debug\net9.0\SQLitePCLRaw.provider.
 D:\Programming\Projects\С#\accoudingWeb\bin\Debug\net9.0\Swashbuckle.AspNetCore.Swagger.dll
 D:\Programming\Projects\С#\accoudingWeb\bin\Debug\net9.0\Swashbuckle.AspNetCore.SwaggerGen.dll
 D:\Programming\Projects\С#\accoudingWeb\bin\Debug\net9.0\Swashbuckle.AspNetCore.SwaggerUI.dll
-D:\Programming\Projects\С#\accoudingWeb\bin\Debug\net9.0\System.Text.Json.dll
 D:\Programming\Projects\С#\accoudingWeb\bin\Debug\net9.0\runtimes\browser-wasm\nativeassets\net9.0\e_sqlite3.a
 D:\Programming\Projects\С#\accoudingWeb\bin\Debug\net9.0\runtimes\linux-arm\native\libe_sqlite3.so
 D:\Programming\Projects\С#\accoudingWeb\bin\Debug\net9.0\runtimes\linux-arm64\native\libe_sqlite3.so
@@ -62,15 +61,10 @@ D:\Programming\Projects\С#\accoudingWeb\obj\Debug\net9.0\scopedcss\bundle\accou
 D:\Programming\Projects\С#\accoudingWeb\obj\Debug\net9.0\staticwebassets.build.json
 D:\Programming\Projects\С#\accoudingWeb\obj\Debug\net9.0\staticwebassets.development.json
 D:\Programming\Projects\С#\accoudingWeb\obj\Debug\net9.0\staticwebassets.build.endpoints.json
-D:\Programming\Projects\С#\accoudingWeb\obj\Debug\net9.0\staticwebassets\msbuild.accoudingWeb.Microsoft.AspNetCore.StaticWebAssets.props
-D:\Programming\Projects\С#\accoudingWeb\obj\Debug\net9.0\staticwebassets\msbuild.accoudingWeb.Microsoft.AspNetCore.StaticWebAssetEndpoints.props
-D:\Programming\Projects\С#\accoudingWeb\obj\Debug\net9.0\staticwebassets\msbuild.build.accoudingWeb.props
-D:\Programming\Projects\С#\accoudingWeb\obj\Debug\net9.0\staticwebassets\msbuild.buildMultiTargeting.accoudingWeb.props
-D:\Programming\Projects\С#\accoudingWeb\obj\Debug\net9.0\staticwebassets\msbuild.buildTransitive.accoudingWeb.props
-D:\Programming\Projects\С#\accoudingWeb\obj\Debug\net9.0\staticwebassets.pack.json
 D:\Programming\Projects\С#\accoudingWeb\obj\Debug\net9.0\accoudin.4C0E930A.Up2Date
 D:\Programming\Projects\С#\accoudingWeb\obj\Debug\net9.0\accoudingWeb.dll
 D:\Programming\Projects\С#\accoudingWeb\obj\Debug\net9.0\refint\accoudingWeb.dll
 D:\Programming\Projects\С#\accoudingWeb\obj\Debug\net9.0\accoudingWeb.pdb
 D:\Programming\Projects\С#\accoudingWeb\obj\Debug\net9.0\accoudingWeb.genruntimeconfig.cache
 D:\Programming\Projects\С#\accoudingWeb\obj\Debug\net9.0\ref\accoudingWeb.dll
+D:\Programming\Projects\С#\accoudingWeb\obj\Debug\net9.0\staticwebassets.build.json.cache

@@ -8,8 +8,6 @@ public class Employee
     public string Password { get; set; } = String.Empty;
     public string Role { get; set; } = string.Empty;
     
-    /*public long OrganizationId { get; set; }
-    public Organization Organization { get; set; }*/
 }
 
 public enum Role

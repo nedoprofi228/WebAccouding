@@ -1,0 +1,191 @@
+напиши html страницу для контроллера, в нем требуется сделать таблицу которую можно прокручивать и в которой будут все заявки. 
+
+Когда наводишь на заявку, то слева появляются кнопки удаления заявки и редактирования.
+
+Снизу должна быть кнопка добавить заявку, при нажатии на которую должно появлятся окно для заполнения формы, в котором будет выпадающий список , в выпадающем списку необходимо выбрать тип заявки Equipment, OfficeEquipment или PreciousMetals, под каждый тип должны быть свои поля. 
+
+При нажатии на кропку редактирования предмета должно появлятся окно с типом заявки как и у предмета и соответствующие поля.
+
+классы для заявок:
+
+public class Equipment
+{
+    public string Name { get; set; } = String.Empty;
+    public decimal Price { get; set; } = 0;
+    public string Type { get; set; } = String.Empty;
+}
+
+public class OfficeEquipment
+{
+    public string Name { get; set; } = String.Empty;
+    public decimal Price { get; set; } = 0;
+    public string PrinterType { get; set; } = String.Empty;
+}
+
+public class PreciousMetals
+{
+    public string Name { get; set; } = String.Empty;
+    public decimal Price { get; set; } = 0;
+    public double Weight { get; set; } = 0;
+    public double Precious { get; set; } = 0;
+}
+
+код контроллера:
+// требуется авторизация, а роли должный быть Админ или Работник
+// маршрутизация по запросу api/tickets
+[Authorize(Roles = "Admin, Employee")]
+[Route("api/tickets")]
+public class EmployeeController(EmployeeService employeeService, ApplicationContext dbContext): Controller
+{
+    
+    /// <summary>
+    ///  метод для получения страницы html
+    /// </summary>
+    /// <param name="context"></param>
+    [HttpGet]
+    public async Task Get(HttpContext context)
+    {
+        // отправка html документа
+        await context.Response.SendFileAsync("../Views/Working/Employee.html");
+    }
+
+    /// <summary>
+    ///  метод для отправки заявки с оборудованием
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="equipmentAccouding"> данные об тикете</param>
+    /// <returns></returns>
+    [HttpPost("/equipment")]
+    public async Task<IActionResult> PostEquipment(HttpContext context, TicketModel<Equipment> equipmentAccouding)
+    {
+        // получения работника который отправляет заявку
+        Employee employee = await dbContext.Users.FirstOrDefaultAsync(u => u.Login == context.User.Identity.Name);
+        
+        // если тикет оборудования создан успешно
+        if (await employeeService.CreateTicket<Equipment>(employee, equipmentAccouding))
+        {
+            // отправка положительного ответа
+            return Ok();
+        }
+        
+        // иначе отправка отрицательного ответа
+        return BadRequest(equipmentAccouding);
+    }
+
+    /// <summary>
+    /// метод для исправления заявки c предметами офисной техники
+    /// </summary>
+    /// <param name="id"> id нужной заявки</param>
+    /// <param name="ticketModel"> исправленная заявка</param>
+    /// <returns></returns>
+    [HttpPut("/equipment/{id}")]
+    public async Task<IActionResult> PutEquipment(HttpContext context, long id, TicketModel<Equipment> ticketModel)
+    {
+        Employee employee = await dbContext.Users.FirstOrDefaultAsync(u => u.Login == context.User.Identity.Name);
+        
+        // также с обновлением ответа
+        if (await employeeService.UpdateTicket<Equipment>(employee,id, ticketModel))
+            return Ok();
+        
+        return BadRequest(ticketModel);
+    }
+    
+    /// <summary>
+    /// метод для отправки заявки c предметами офисной техники
+    /// </summary>
+    /// <param name="ticketModel"></param>
+    /// <returns></returns>
+    [HttpPost("/officeEquipment")]
+    public async Task<IActionResult> PostOfficeEquipment(HttpContext context, TicketModel<OfficeEquipment> ticketModel)
+    {
+        Employee employee = await dbContext.Users.FirstOrDefaultAsync(u => u.Login == context.User.Identity.Name);
+        if (await employeeService.CreateTicket<OfficeEquipment>(employee, ticketModel))
+        {
+            return Ok();
+        }
+        
+        return BadRequest(ticketModel);
+    }
+
+    /// <summary>
+    /// метод для исправления заявки с офисной техникой
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="newTicketModel"></param>
+    /// <returns></returns>
+    [HttpPut("/officeEquipment/{id}")]
+    public async Task<IActionResult> PutOfficeEquipment(HttpContext context, long id, TicketModel<OfficeEquipment> ticketModel)
+    {
+        Employee employee = await dbContext.Users.FirstOrDefaultAsync(u => u.Login == context.User.Identity.Name);
+        if (await employeeService.UpdateTicket<OfficeEquipment>(employee,id, ticketModel))
+            return Ok();
+        
+        return BadRequest(ticketModel);
+    }
+
+    
+    /// <summary>
+    /// метод для добавления новой заявки с драгоценными металлами
+    /// </summary>
+    /// <param name="equipmentAccouding"></param>
+    /// <returns></returns>
+    [HttpPost("/PreciousMetals")]
+    public async Task<IActionResult> PostPreciousMetals(HttpContext context, TicketModel<PreciousMetals> ticketModel)
+    {
+        Employee employee = await dbContext.Users.FirstOrDefaultAsync(u => u.Login == context.User.Identity.Name);
+        if (await employeeService.CreateTicket<PreciousMetals>(employee, ticketModel))
+        {
+            return Ok();
+        }
+        
+        return BadRequest(ticketModel);
+    }
+
+    
+    /// <summary>
+    /// метод для исправления заявки с драгоценными металлами
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="newTicketModel"></param>
+    /// <returns></returns>
+    [HttpPut("/PreciousMetals/{id}")]
+    public async Task<IActionResult> PutPreciousMetals(HttpContext context, long id, TicketModel<PreciousMetals> newTicketModel)
+    {
+        Employee employee = await dbContext.Users.FirstOrDefaultAsync(u => u.Login == context.User.Identity.Name);
+        if (await employeeService.UpdateTicket<PreciousMetals>(employee,id, newTicketModel))
+            return Ok();
+        
+        return BadRequest(newTicketModel);
+    }
+    
+    
+    /// <summary>
+    /// метод для удаления предмета
+    /// </summary>
+    /// <param name="type">тип предмета</param>
+    /// <param name="id">id нужного предмета</param>
+    /// <returns></returns>
+    [HttpDelete("/{type}/{id}")]
+    public async Task<IActionResult> Delete(HttpContext context, string type, long id)
+    {
+        Employee employee = await dbContext.Users.FirstOrDefaultAsync(u => u.Login == context.User.Identity.Name);
+        switch (type)
+        {
+            case "equipment":
+                if(await employeeService.DeleteTicket<Equipment>(employee, id))
+                    return Ok();
+                break;
+            case "officeEquipment":
+                if (await employeeService.DeleteTicket<OfficeEquipment>(employee, id))
+                    return Ok();
+                break;
+            case "preciousMetals":
+                if (await employeeService.DeleteTicket<PreciousMetals>(employee, id))
+                    return Ok();
+                break;
+        }
+
+        return BadRequest(id);
+    }
+    
+}

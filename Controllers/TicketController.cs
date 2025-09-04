@@ -91,7 +91,7 @@ public class TicketController(EmployeeService employeeService, ApplicationContex
     }
     
     [HttpGet("pending/{itemsType}")]
-    public async Task GetItemsPending([FromRoute] string itemsType)
+    public async Task GetItemsPendingByUser([FromRoute] string itemsType)
     {
         Response.ContentType = "application/json";
         
@@ -119,7 +119,6 @@ public class TicketController(EmployeeService employeeService, ApplicationContex
                 return;
         }
     }
-    
     
     /// <summary>
     ///  метод для отправки заявки с оборудованием

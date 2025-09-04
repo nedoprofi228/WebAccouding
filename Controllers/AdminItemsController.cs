@@ -153,7 +153,7 @@ public class AdminControllerv(ApplicationContext dbContext) : ControllerBase
             return BadRequest(ModelState);
         }
         
-        officeEquipmentModel.Name = officeEquipment.Name;
+        officeEquipment.Name = officeEquipmentModel.Name ;
         officeEquipment.Price = officeEquipmentModel.Price;
         officeEquipment.PrinterType = officeEquipmentModel.PrinterType;
         

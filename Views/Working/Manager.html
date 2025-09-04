@@ -64,15 +64,15 @@
 
     async function fetchTickets() {
         ticketsTable.innerHTML = '';
-        const response = await fetch('/tickets/pending/equipment', { method: 'GET' });
+        const response = await fetch('/manager/pending/equipment', { method: 'GET' });
         var tickets = await response.json();
         renderTickets(tickets, "equipment", "оборудование");
 
-        const response2 = await fetch('/tickets/pending/officeEquipment', { method: 'GET' });
+        const response2 = await fetch('/manager/pending/officeEquipment', { method: 'GET' });
         tickets = await response2.json();
         renderTickets(tickets, "officeEquipment", "офисное оборудование");
 
-        const response3 = await fetch('/tickets/pending/preciousMetals', { method: 'GET' });
+        const response3 = await fetch('/manager/pending/preciousMetals', { method: 'GET' });
         tickets = await response3.json();
         renderTickets(tickets, "preciousMetals", "драгоценные металлы");
     }

@@ -54,6 +54,34 @@ public class ManagerController(ApplicationContext dbContext, ManagerService mana
         };
     }
 
+    [HttpGet("pending/{itemsType}")]
+    public async Task GetItemsPendingByUser([FromRoute] string itemsType)
+    {
+        Response.ContentType = "application/json";
+        
+        switch (itemsType)
+        {
+            case "equipment":
+                await Response.WriteAsync(JsonSerializer.Serialize(dbContext.TicketsEquipment
+                    .Where(e =>  e.TicketStatus == Ticketstatus.Pending.ToString())
+                    .ToList()));
+                return;
+            
+            case "officeEquipment":
+                await Response.WriteAsync(JsonSerializer.Serialize(dbContext.TicketsOfficeEquipment
+                    .Where(e => e.TicketStatus == Ticketstatus.Pending.ToString())
+                    .ToList()));
+                return;
+            
+            case "preciousMetals":
+                await Response.WriteAsync(JsonSerializer.Serialize(dbContext.TicketsPreciousMetals
+                    .Where(e =>  e.TicketStatus == Ticketstatus.Pending.ToString())
+                    .ToList()));
+                return;
+        }
+    }
+
+    
     /// <summary>
     ///  обощенный вспомогаеющий метод для закрытия тикета
     /// </summary>
@@ -77,4 +105,6 @@ public class ManagerController(ApplicationContext dbContext, ManagerService mana
         
         return Ok();
     }
+    
+    
 }

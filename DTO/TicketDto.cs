@@ -1,6 +1,6 @@
 namespace accoudingWeb.DTO;
 
-public class TicketDto
+public class TicketDto<T>
 {
     public long Id { get; set; }
     public string Name { get; set; }
@@ -8,5 +8,5 @@ public class TicketDto
     public string TicketStatus { get; set; }
     public decimal TotalPrice { get; set; }
     public string EmployeeName { get; set; }
-    public List<MinimalItem> Items { get; set; }
+    public List<T> Items { get; set; }
 }

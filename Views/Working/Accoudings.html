@@ -88,6 +88,10 @@
         .btn:hover {
             background-color: #45a049;
         }
+        /* Стили для новых таблиц */
+        .summary-table {
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -122,32 +126,90 @@
     <!-- Здесь будет подробная информация -->
 </div>
 
+<!-- Таблицы для итоговых расчетов -->
+<div id="summaryTables">
+    <h2>Итоговые расчеты</h2>
+    <table id="costSummaryTable" class="summary-table">
+        <thead>
+        <tr>
+            <th>Тип</th>
+            <th>Общая стоимость</th>
+            <th>Общее количество</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Здесь будут данные по стоимости -->
+        </tbody>
+    </table>
+
+    <table id="preciousMetalsTable" class="summary-table">
+        <thead>
+        <tr>
+            <th>Тип металла</th>
+            <th>Общий вес</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Здесь будут данные по драгметаллам -->
+        </tbody>
+    </table>
+    
+</div>
+
 <!-- JavaScript -->
 <script>
-    // Переменная isAdmin для управления правами администратора
-    const isAdmin = true; // Вы можете менять это значение вручную
-
-    // Добавление класса admin к body, если пользователь администратор
-    if (isAdmin) {
-        document.body.classList.add('admin');
-    }
 
     // Обработчики кликов на кнопки
-    document.getElementById('loadEquipment').addEventListener('click', () => loadReports('equipment'));
-    document.getElementById('loadOfficeEquipment').addEventListener('click', () => loadReports('officeEquipment'));
-    document.getElementById('loadPreciousMetals').addEventListener('click', () => loadReports('preciousMetals'));
+    document.getElementById('loadEquipment').addEventListener('click', () => reportsAction('equipment', displayReports));
+    document.getElementById('loadOfficeEquipment').addEventListener('click', () => reportsAction('officeEquipment', displayReports));
+    document.getElementById('loadPreciousMetals').addEventListener('click', () => reportsAction('preciousMetals', displayReports));
     const tbody = document.querySelector('#reportsTable tbody');
     const detailsDiv = document.getElementById('reportDetails');
+    const costSummaryTableBody = document.querySelector('#costSummaryTable tbody');
+    const preciousMetalsTableBody = document.querySelector('#preciousMetalsTable tbody');
+    let equipmentCost = 0;
+    let equipmentCount = 0;
+    const preciousMetals = {};
+    
+    Main();
+    async function Main(){
+        await reportsAction('equipment', calculateSummaries)
+        await reportsAction('officeEquipment', calculateSummaries)
+        await reportsAction('preciousMetals', calculateSummaries)
+    
+        if (equipmentCost > 0) {
+            const equipmentRow = document.createElement('tr');
+            equipmentRow.innerHTML = `
+                <td>Оборудование</td>
+                <td>${equipmentCost.toFixed(2)}</td>
+                <td>${equipmentCount}</td>
+            `;
+            costSummaryTableBody.appendChild(equipmentRow);
+        }
+    
+    
+        // Заполнение таблицы драгоценных металлов
+    
+            for (const [metal, weight] of Object.entries(preciousMetals)) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${metal}</td>
+                    <td>${weight.toFixed(2)}</td>
+                `;
+                preciousMetalsTableBody.appendChild(row);
+            }
+        }
+    
 
     // Функция для загрузки отчетов с сервера
-    async function loadReports(type) {
+    async function reportsAction(type, action) {
         try {
             tbody.innerHTML = '';
             detailsDiv.innerHTML = '';
             const response = await fetch(`/accoudings/${type}`);
             if (!response.ok) throw new Error('Ошибка загрузки данных');
             const reports = await response.json();
-            displayReports(reports, type);
+            action(reports, type);
         } catch (error) {
             console.error('Ошибка:', error);
         }
@@ -194,7 +256,7 @@
                     method: 'DELETE'
                 });
                 if (!response.ok) throw new Error('Ошибка удаления отчета');
-                loadReports(type); // Перезагружаем список отчетов
+                showReports(type); // Перезагружаем список отчетов
             } catch (error) {
                 console.error('Ошибка:', error);
                 alert('Не удалось удалить отчет');
@@ -218,8 +280,7 @@
         report.Ticket.Items.forEach(item => {
             const itemDiv = document.createElement('div');
             itemDiv.classList.add('item');
-            itemDiv.setAttribute('data-item-id', item.Name); // Используем Name как идентификатор
-            itemDiv.setAttribute('data-item-id', item.Name); // Используем Name как идентификатор
+            itemDiv.setAttribute('data-item-id', item.Name);
 
             let itemHtml = '';
             switch (type) {
@@ -261,7 +322,37 @@
         detailsDiv.style.display = 'block';
     }
 
-    
+    // Функция для расчета и отображения итоговых таблиц
+    function calculateSummaries(reports, type) {
+
+        reports.forEach(report => {
+            if (report.Ticket.TicketStatus === 'Accepted' && (type === 'equipment' || type === 'officeEquipment')) {
+                const items = report.Ticket.Items;
+                equipmentCost += report.Ticket.TotalPrice;
+                items.forEach(item => {
+                    const price = parseFloat(item.Price);
+                    console.log(`Элемент: ${item.Name}, Цена: ${item.Price}, После parseFloat: ${price}`); // Отладка
+                    if (type === 'equipment' || type === "officeEquipment") {
+                        equipmentCount++;
+                    }
+                });
+            } else if (report.Ticket.TicketStatus === 'Accepted' && type === 'preciousMetals') {
+                const items = report.Ticket.Items;
+                items.forEach(item => {
+                    if (item.Precious && item.Weight) {
+                        if (!preciousMetals[item.Precious]) {
+                            preciousMetals[item.Precious] = 0;
+                        }
+                        preciousMetals[item.Precious] += parseFloat(item.Weight) || 0;
+                    }
+                });
+            }
+        });
+
+        console.log(`Тип: ${type}, equipmentCost: ${equipmentCost}`); // Отладка
+        
+
+    }
 </script>
 </body>
 </html>

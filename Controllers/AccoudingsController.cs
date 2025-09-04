@@ -98,7 +98,7 @@ public class AccoudingsController(ApplicationContext dbContext) : ControllerBase
     /// <param name="dbSet">таблица с предметом</param>
     /// <typeparam name="T">тип предмета</typeparam>
     /// <returns></returns>
-    private async Task<string> ConvertAccoudingToJsonAsync<T>(DbSet<Accouding<T>> dbSet) where T : BaseItem<T>
+    private async Task<string> ConvertAccoudingToJsonAsync<T>(DbSet<Accouding<T>> dbSet)
     {
         // перевод массива объектов в джсон
         return JsonSerializer.Serialize(dbSet
@@ -107,12 +107,12 @@ public class AccoudingsController(ApplicationContext dbContext) : ControllerBase
             .ThenInclude(t => t.Items)
             .Include(a => a.Manager)
                 // создает другой класс для передачи данных на фронт с помощью DTO
-            .Select(a => new AccoudingDto()
+            .Select(a => new AccoudingDto<T>()
             {
                 Id = a.Id,
                 Date = a.Date,
                 Manager = a.Manager,
-                Ticket = new TicketDto()
+                Ticket = new TicketDto<T>()
                 {
                     Id = a.Ticket.Id,
                     Name = a.Ticket.Name,
@@ -120,12 +120,7 @@ public class AccoudingsController(ApplicationContext dbContext) : ControllerBase
                     TicketStatus = a.Ticket.TicketStatus,
                     TotalPrice = a.Ticket.TotalPrice,
                     EmployeeName = a.Ticket.Employee.Name,
-                    Items = a.Ticket.Items.Select(i => new MinimalItem
-                    {
-                        Id = i.Id,
-                        Name = i.Name,
-                        Price = i.Price,
-                    }).ToList()
+                    Items = a.Ticket.Items
                 }
             })
             .ToList());
